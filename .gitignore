@@ -8,3 +8,7 @@ __pycache__/
 .ipynb_checkpoints/
 logdir/locks/
 logdir/bad_gpus
+logdir_aborted/
+logdir_ablation/*/replay/
+logdir_ablation/*/ckpt/
+logdir_ablation/*/scope/

@@ -215,7 +215,7 @@ def main():
         elif lo - std <= ours_final <= hi + std:
           verdict = 'reproduced'
         else:
-          verdict = 'mismatch'
+          verdict = 'above official range' if ours_final > hi + std else 'below official range'
         summary.append(dict(
             suite=suite, task=task, seed=r['seed'], run=r['name'], done=r['done'],
             progress=round(progress, 3), ours_final=None if np.isnan(ours_final) else round(ours_final, 1),
@@ -235,10 +235,12 @@ def main():
         mean_curve = np.nanmean(np.stack([binned(r['xs'], r['ys'], edges) for r in done_runs]), 0)
         gband = curve_in_band(mean_curve, env)
         lo, hi, std = min(off_final), max(off_final), float(np.std(off_final))
-        final_ok = lo - std <= float(np.mean(finals)) <= hi + std
+        m = float(np.mean(finals))
+        final_ok = lo - std <= m <= hi + std
         curve_ok = gband is not None and gband >= CURVE_PASS
         verdict = ('reproduced' if final_ok and curve_ok else
-                   'final ok, curve differs' if final_ok else 'mismatch')
+                   'final ok, curve differs' if final_ok else
+                   'above official range' if m > hi + std else 'below official range')
         if len(finals) < EXPECTED_SEEDS:
           verdict += f' (partial {len(finals)}/{EXPECTED_SEEDS})'
       else:
