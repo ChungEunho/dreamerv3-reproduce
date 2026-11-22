@@ -9,3 +9,13 @@ atari100k_ms_pacman_s0 --configs atari100k --task atari100k_ms_pacman --seed 0
 atari100k_pong_s1 --configs atari100k --task atari100k_pong --seed 1
 atari100k_boxing_s1 --configs atari100k --task atari100k_boxing --seed 1
 atari100k_hero_s1 --configs atari100k --task atari100k_hero --seed 1
+atari100k_krull_s1 --configs atari100k --task atari100k_krull --seed 1
+atari100k_kung_fu_master_s1 --configs atari100k --task atari100k_kung_fu_master --seed 1
+atari100k_ms_pacman_s1 --configs atari100k --task atari100k_ms_pacman --seed 1
+# stretch goal: third seed for every game (runs only if time permits; remove lines to drop)
+atari100k_pong_s2 --configs atari100k --task atari100k_pong --seed 2
+atari100k_boxing_s2 --configs atari100k --task atari100k_boxing --seed 2
+atari100k_hero_s2 --configs atari100k --task atari100k_hero --seed 2
+atari100k_krull_s2 --configs atari100k --task atari100k_krull --seed 2
+atari100k_kung_fu_master_s2 --configs atari100k --task atari100k_kung_fu_master --seed 2
+atari100k_ms_pacman_s2 --configs atari100k --task atari100k_ms_pacman --seed 2

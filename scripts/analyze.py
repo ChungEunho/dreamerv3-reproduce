@@ -10,8 +10,9 @@ Produces
     docs/results.json                machine readable summary
 
 Conventions
-  * Atari100k x-axis is environment frames (agent steps * action repeat 4),
-    which is what the official score files use (budget 400k frames).
+  * Atari100k x-axis is environment frames (the repo logs `step` already
+    multiplied by the action repeat of 4), matching the official score files
+    (budget 400k frames; a run ends at 110k agent steps = 440k frames).
   * "Final score" = mean episode return over the last 10% of the frame budget
     (360k-400k frames), computed identically for our runs and official seeds.
   * Verdict "reproduced" if our final score is within the official
@@ -35,8 +36,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCORES = ROOT / 'dreamerv3' / 'scores'
 
 SUITES = {
-    # suite: (official file, x budget, action repeat, step->frame factor)
-    'atari100k': dict(file='atari100k-dreamerv3.json.gz', budget=400_000, repeat=4),
+    # suite: official file, x budget, multiplier applied to the logged 'step'.
+    # NOTE: the repo's logger already multiplies the step counter by the action
+    # repeat (main.py: elements.Logger(step, outputs, multiplier)), so the
+    # 'step' in metrics.jsonl / scores.jsonl is in env FRAMES for Atari.
+    'atari100k': dict(file='atari100k-dreamerv3.json.gz', budget=400_000, repeat=1),
     'dmc_vision': dict(file='dmc_vision-dreamerv3.json.gz', budget=1_000_000, repeat=1),
     'dmc_proprio': dict(file='dmc_proprio-dreamerv3.json.gz', budget=1_000_000, repeat=1),
 }
