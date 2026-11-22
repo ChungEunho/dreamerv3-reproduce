@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Rebuild the results page from logdir/ and push it to GitHub (Pages serves docs/).
-# Usage: scripts/publish.sh ["commit message"]
+# Rebuild the results page from logdir/ and commit it locally. Pushes to GitHub
+# only with --push (results are published once the reproduction is verified).
+# Usage: scripts/publish.sh [--push] ["commit message"]
 set -euo pipefail
+PUSH=0; if [[ "${1:-}" == "--push" ]]; then PUSH=1; shift; fi
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PY="/mnt/data8tb/eunho/miniforge3/envs/dreamerv3/bin/python"
 cd "$ROOT"
@@ -17,5 +19,5 @@ if git diff --cached --quiet; then echo "[publish] nothing to commit"; exit 0; f
 git commit -q -m "${1:-results: update $(date '+%Y-%m-%d %H:%M')}
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
-git push -q origin main
-echo "[publish] pushed $(git rev-parse --short HEAD)"
+echo "[publish] committed $(git rev-parse --short HEAD)"
+if [[ $PUSH -eq 1 ]]; then git push -q origin main; echo "[publish] pushed"; fi
