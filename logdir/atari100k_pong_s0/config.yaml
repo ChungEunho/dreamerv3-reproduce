@@ -86,12 +86,12 @@ env:
     size: [96, 96]
     sticky: true
   atari100k:
-    actions: needed
+    actions: all
     autostart: false
     clip_reward: false
     gray: false
     lives: unused
-    noops: 30
+    noops: 0
     repeat: 4
     resize: pillow
     size: [64, 64]

@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-23 01:39 KST · runs: 1 (finished 0, reproduced 0)_
+_Last updated: 2026-11-23 06:00 KST · runs: 1 (finished 1, reproduced 0/1 games)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -66,9 +66,17 @@ Exact package versions: [`env/requirements-lock.txt`](https://github.com/ChungEu
 runs and for each official seed. A run counts as *reproduced* if its final score lies inside the official
 seed range `[min, max]` widened by one std.
 
-| suite | task | seed | progress | ours (last 10%) | official mean ± std (min–max, n seeds) | verdict |
+#### Per game (verdict over our finished seeds)
+
+| task | seeds done | ours mean ± std | paper Table 9 | official file mean (min–max, 5 seeds) | gamer-norm ours / paper | curve in band | verdict |
+|---|---|---|---|---|---|---|---|
+| pong | 1/3 | -12.0 ± 0.0 | -4 | -4.2 (-9.2–-1.3) | 25.0% / 47.2% | 74% | **below official range (partial 1/3)** |
+
+#### Per seed
+
+| task | seed | progress | ours (last 10%) | official mean ± std (min–max) | curve in band | verdict |
 |---|---|---|---|---|---|---|
-| atari100k | atari_pong | 0 | 52% | – | -4.2 ± 2.7 (-9.2–-1.3, n=5) | **running** |
+| pong | 0 | 100% | -12.0 | -4.2 ± 2.7 (-9.2–-1.3) | 74% | **below official range** |
 
 
 ![atari100k](assets/atari100k_overview.png)
@@ -90,13 +98,14 @@ pip install crafter dm_control matplotlib pandas pyyaml
 scripts/launch.sh 2 atari100k_pong_s0 --configs atari100k --task atari100k_pong --seed 0
 
 # 3. (optional) run the whole job list in scripts/queue.txt sequentially
-scripts/queue.sh 2 0 1 3        # GPU preference order; waits for an idle GPU
+tmux new -d -s wA "scripts/queue.sh A 2 0 1 3"   # worker A, GPU preference order
+tmux new -d -s wB "scripts/queue.sh B 0 1 3 2"   # worker B (max 2 workers = max 2 GPUs)
 
 # 4. compare with the official scores and rebuild this page
 python scripts/analyze.py --logdir logdir --out docs
 ```
 
-`scripts/launch.sh` refuses to start if the chosen GPU is busy, and `scripts/queue.sh` blacklists a GPU that
+`scripts/launch.sh` refuses to start if the chosen GPU is busy. `scripts/queue.sh` workers only take a GPU that is completely idle, coordinate through lock files, blacklist a GPU that
 dies with a CUDA error and resumes the run from its checkpoint on another idle GPU.
 
 ## 6. Notes & limitations
