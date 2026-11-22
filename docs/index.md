@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-23 01:38 KST · runs: 1 (finished 0, reproduced 0)_
+_Last updated: 2026-11-23 01:39 KST · runs: 1 (finished 0, reproduced 0)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -68,7 +68,7 @@ seed range `[min, max]` widened by one std.
 
 | suite | task | seed | progress | ours (last 10%) | official mean ± std (min–max, n seeds) | verdict |
 |---|---|---|---|---|---|---|
-| atari100k | atari_pong | 0 | 46% | – | -4.2 ± 2.7 (-9.2–-1.3, n=5) | **running** |
+| atari100k | atari_pong | 0 | 52% | – | -4.2 ± 2.7 (-9.2–-1.3, n=5) | **running** |
 
 
 ![atari100k](assets/atari100k_overview.png)
