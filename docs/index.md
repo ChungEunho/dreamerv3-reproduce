@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-23 01:30 KST · runs: 1 (finished 0, reproduced 0)_
+_Last updated: 2026-11-23 01:38 KST · runs: 1 (finished 0, reproduced 0)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -46,7 +46,7 @@ for Atari100k it uses `train_ratio=256`, one env, 110k agent steps (= 440k frame
 | Throughput | ≈3.1 gradient updates/s (batch 16×64), ≈13 env steps/s at steady state |
 | Wall-clock | ≈2.2 h per Atari100k run |
 
-Exact package versions: [`env/requirements-lock.txt`](https://github.com/OWNER/REPO/blob/main/env/requirements-lock.txt).
+Exact package versions: [`env/requirements-lock.txt`](https://github.com/ChungEunho/dreamerv3-reproduce/blob/main/env/requirements-lock.txt).
 
 ### Install notes / pitfalls we hit
 
@@ -68,12 +68,12 @@ seed range `[min, max]` widened by one std.
 
 | suite | task | seed | progress | ours (last 10%) | official mean ± std (min–max, n seeds) | verdict |
 |---|---|---|---|---|---|---|
-| atari100k | atari_pong | 0 | 21% | – | -4.2 ± 2.7 (-9.2–-1.3, n=5) | **running** |
+| atari100k | atari_pong | 0 | 46% | – | -4.2 ± 2.7 (-9.2–-1.3, n=5) | **running** |
 
 
 ![atari100k](assets/atari100k_overview.png)
 
-Per-task figures are in [`docs/assets/`](https://github.com/OWNER/REPO/tree/main/docs/assets)
+Per-task figures are in [`docs/assets/`](https://github.com/ChungEunho/dreamerv3-reproduce/tree/main/docs/assets)
 (grey = official mean ± std over 5 seeds, colored = our seeds).
 
 ## 5. How to reproduce
