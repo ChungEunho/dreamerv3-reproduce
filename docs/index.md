@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-23 06:00 KST · runs: 1 (finished 1, reproduced 0/1 games)_
+_Last updated: 2026-11-23 08:22 KST · runs: 3 (finished 2, reproduced 0/3 games)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -70,12 +70,16 @@ seed range `[min, max]` widened by one std.
 
 | task | seeds done | ours mean ± std | paper Table 9 | official file mean (min–max, 5 seeds) | gamer-norm ours / paper | curve in band | verdict |
 |---|---|---|---|---|---|---|---|
+| boxing | 1/3 | 78.8 ± 0.0 | 82 | 79.4 (70.2–85.0) | 656.9% / 683.3% | 88% | **reproduced (partial 1/3)** |
+| hero | 0/3 | – | 13354 | 13344.3 (13190.7–13465.0) | – / 41.4% | – | **running** |
 | pong | 1/3 | -12.0 ± 0.0 | -4 | -4.2 (-9.2–-1.3) | 25.0% / 47.2% | 74% | **below official range (partial 1/3)** |
 
 #### Per seed
 
 | task | seed | progress | ours (last 10%) | official mean ± std (min–max) | curve in band | verdict |
 |---|---|---|---|---|---|---|
+| boxing | 0 | 100% | 78.8 | 79.4 ± 5.7 (70.2–85.0) | 88% | **reproduced** |
+| hero | 0 | 19% | – | 13344.3 ± 96.5 (13190.7–13465.0) | 75% | **running** |
 | pong | 0 | 100% | -12.0 | -4.2 ± 2.7 (-9.2–-1.3) | 74% | **below official range** |
 
 
