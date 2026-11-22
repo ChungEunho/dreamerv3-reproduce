@@ -6,8 +6,9 @@
 # '#' lines are skipped; the file is re-read before every job.
 #
 # Per job:
-#   1. Wait until one of this worker's preferred GPUs is idle (no compute
-#      process, <= 1 GB used) and claim it (logdir/locks/gpu_<i>).
+#   1. Wait until one of this worker's preferred GPUs is free (scripts/gpu_free.sh:
+#      no compute OR graphics process except Xorg/gnome-shell, <= 1 GB used)
+#      and claim it (logdir/locks/gpu_<i>).
 #   2. Claim the first pending job (logdir/locks/job_<name>). A job is pending
 #      unless it has a DONE / GAVEUP marker or is claimed by a live process.
 #      A run that already reached its step budget is just marked DONE.
@@ -46,11 +47,15 @@ claim() {
 }
 release() { [[ -n "$1" ]] && { rm -f "$1/pid"; rmdir "$1" 2>/dev/null; }; return 0; }
 
+# A GPU must stay free for 5 minutes straight (10 checks, 30 s apart), so a
+# renderer that briefly restarts is not mistaken for a free GPU.
 gpu_idle() {
-  local procs used
-  procs=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "$1" | wc -l)
-  used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$1")
-  [[ "$procs" -eq 0 && "$used" -le 1024 ]]
+  local i
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    "$ROOT/scripts/gpu_free.sh" "$1" || return 1
+    [[ $i -lt 10 ]] && sleep 30
+  done
+  return 0
 }
 
 pick_gpu() {  # claims and prints an idle, non-blacklisted GPU

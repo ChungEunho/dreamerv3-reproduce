@@ -2,8 +2,8 @@
 # Launcher for DreamerV3 runs on the shared 4x RTX 5090 box.
 #
 # Safety rules (from the team):
-#   * Only use a GPU that nobody else is using. The target GPU is checked with
-#     nvidia-smi right before launch and the run is aborted if it is busy.
+#   * Only use a GPU that nobody else is using (compute OR graphics processes).
+#     The target GPU is checked right before launch and the run is aborted if busy.
 #   * Never preallocate the whole GPU memory (XLA_PYTHON_CLIENT_PREALLOCATE=false).
 #
 # Usage:
@@ -23,11 +23,11 @@ if [[ "$GPU" == "cpu" ]]; then
   export CUDA_VISIBLE_DEVICES=""
   PLATFORM_ARGS="--jax.platform cpu"
 else
-  # Abort if the GPU has any compute process or more than 1 GB used.
-  USED=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$GPU")
-  PROCS=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "$GPU" | wc -l)
-  if [[ "$PROCS" -gt 0 || "$USED" -gt 1024 ]]; then
-    echo "GPU $GPU is in use (procs=$PROCS, mem=${USED}MiB). Refusing to launch." >&2
+  # Abort unless the GPU is completely free (no compute or graphics process of
+  # anyone else, see scripts/gpu_free.sh).
+  if ! "$ROOT/scripts/gpu_free.sh" "$GPU"; then
+    echo "GPU $GPU is in use:" >&2; "$ROOT/scripts/gpu_free.sh" "$GPU" -v >&2
+    echo "Refusing to launch." >&2
     exit 1
   fi
   export CUDA_VISIBLE_DEVICES="$GPU"
