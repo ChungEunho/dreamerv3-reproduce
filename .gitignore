@@ -1,0 +1,8 @@
+logdir/*/replay/
+logdir/*/ckpt/
+logdir/*/scope/
+logdir/debug*/
+*.log
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

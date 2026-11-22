@@ -1,0 +1,4 @@
+title: DreamerV3 Reproduction (Week 1)
+description: Reproducing "Mastering Diverse Domains through World Models" (DreamerV3) on Atari100k
+theme: jekyll-theme-cayman
+markdown: kramdown

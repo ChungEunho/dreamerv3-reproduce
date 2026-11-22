@@ -1,0 +1,11 @@
+# <logdir_name> <main.py args>   (processed top to bottom; append freely)
+# Atari100k, paper default config (200M model, train_ratio 256, 110k agent steps)
+atari100k_pong_s0 --configs atari100k --task atari100k_pong --seed 0
+atari100k_boxing_s0 --configs atari100k --task atari100k_boxing --seed 0
+atari100k_hero_s0 --configs atari100k --task atari100k_hero --seed 0
+atari100k_krull_s0 --configs atari100k --task atari100k_krull --seed 0
+atari100k_kung_fu_master_s0 --configs atari100k --task atari100k_kung_fu_master --seed 0
+atari100k_ms_pacman_s0 --configs atari100k --task atari100k_ms_pacman --seed 0
+atari100k_pong_s1 --configs atari100k --task atari100k_pong --seed 1
+atari100k_boxing_s1 --configs atari100k --task atari100k_boxing --seed 1
+atari100k_hero_s1 --configs atari100k --task atari100k_hero --seed 1
