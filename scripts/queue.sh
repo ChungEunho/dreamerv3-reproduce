@@ -1,29 +1,50 @@
 #!/usr/bin/env bash
-# Sequential job queue for the shared 4x RTX 5090 box.
+# Job queue worker for the shared 4x RTX 5090 box. Run up to TWO workers
+# (team rule: at most 2 GPUs); they coordinate through lock directories.
 #
-# Reads jobs from scripts/queue.txt, one per line:
-#   <logdir_name> <main.py args...>
-# Lines starting with '#' are skipped. The file is re-read after every job so
-# new jobs can be appended while the queue is running. A job whose logdir
-# already contains a 'DONE' marker is skipped, so the queue can be restarted.
+# Jobs come from scripts/queue.txt, one per line:  <logdir_name> <main.py args...>
+# '#' lines are skipped; the file is re-read before every job.
 #
-# GPU policy (team rules):
-#   * GPUs are tried in the order given on the command line (default "2 0 1 3").
-#   * A GPU is only used when it is idle: no compute processes and <= 1 GB used.
-#     Other people's jobs are never touched; the queue waits instead.
-#   * If a job dies with a CUDA / unknown error, that GPU is put on a blacklist
-#     (logdir/bad_gpus) and the job is resumed from its checkpoint on another
-#     idle GPU. Up to MAX_RETRIES attempts per job.
+# Per job:
+#   1. Wait until one of this worker's preferred GPUs is idle (no compute
+#      process, <= 1 GB used) and claim it (logdir/locks/gpu_<i>).
+#   2. Claim the first pending job (logdir/locks/job_<name>). A job is pending
+#      unless it has a DONE / GAVEUP marker or is claimed by a live process.
+#      A run that already reached its step budget is just marked DONE.
+#   3. Run it via launch.sh; release both locks afterwards.
+# Locks hold the owner's PID; a lock whose PID is dead is stale and reclaimed.
+# A GPU that dies with a CUDA / unknown error is blacklisted (logdir/bad_gpus)
+# and the job resumes from its checkpoint on the next attempt (max 3).
 #
-# Usage: scripts/queue.sh [gpu_pref ...]      e.g. scripts/queue.sh 2 0 1 3
+# Usage: scripts/queue.sh <worker_name> <gpu_pref ...>
+#   tmux new -d -s dreamer_wA 'scripts/queue.sh A 2 0 1 3'
+#   tmux new -d -s dreamer_wB 'scripts/queue.sh B 0 1 3 2'
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PY="/mnt/data8tb/eunho/miniforge3/envs/dreamerv3/bin/python"
 QUEUE="$ROOT/scripts/queue.txt"
+LOCKS="$ROOT/logdir/locks"
 BAD="$ROOT/logdir/bad_gpus"
 MAX_RETRIES=3
+WORKER="$1"; shift
 PREF=("$@"); [[ ${#PREF[@]} -eq 0 ]] && PREF=(2 0 1 3)
-mkdir -p "$ROOT/logdir"; touch "$BAD"
+mkdir -p "$LOCKS"; touch "$BAD"
+
+log() { echo "[queue $WORKER] $(date '+%F %T') $*"; }
+
+# claim <lockdir> : atomically create a lock owned by this shell; reclaim stale ones.
+claim() {
+  local d="$1" pid
+  if mkdir "$d" 2>/dev/null; then echo $$ > "$d/pid"; return 0; fi
+  pid=$(cat "$d/pid" 2>/dev/null || true)
+  if [[ -n "$pid" ]] && ! kill -0 "$pid" 2>/dev/null; then
+    rm -f "$d/pid"; rmdir "$d" 2>/dev/null
+    if mkdir "$d" 2>/dev/null; then echo $$ > "$d/pid"; return 0; fi
+  fi
+  return 1
+}
+release() { [[ -n "$1" ]] && { rm -f "$1/pid"; rmdir "$1" 2>/dev/null; }; return 0; }
 
 gpu_idle() {
   local procs used
@@ -32,52 +53,87 @@ gpu_idle() {
   [[ "$procs" -eq 0 && "$used" -le 1024 ]]
 }
 
-pick_gpu() {  # prints the first idle, non-blacklisted GPU, or nothing
+pick_gpu() {  # claims and prints an idle, non-blacklisted GPU
   local g
   for g in "${PREF[@]}"; do
     grep -qx "$g" "$BAD" && continue
-    gpu_idle "$g" && { echo "$g"; return 0; }
+    claim "$LOCKS/gpu_$g" || continue
+    if gpu_idle "$g"; then echo "$g"; return 0; fi
+    release "$LOCKS/gpu_$g"
   done
   return 1
 }
 
-cuda_error() {  # did this log die from a GPU-side error?
-  grep -qiE "CUDA_ERROR|cuda error|unknown error|XlaRuntimeError|INTERNAL: |RESOURCE_EXHAUSTED|out of memory|cudnn|cublas|NCCL|device-side|illegal memory" "$1"
-}
-
-while true; do
-  job=""
+pick_job() {  # claims and prints the first pending job line
+  local line name
   while IFS= read -r line; do
     [[ -z "$line" || "$line" =~ ^# ]] && continue
     name="${line%% *}"
-    [[ -f "$ROOT/logdir/$name/DONE" ]] && continue
-    [[ -f "$ROOT/logdir/$name.GAVEUP" ]] && continue
-    job="$line"; break
+    [[ -f "$ROOT/logdir/$name/DONE" || -f "$ROOT/logdir/$name.GAVEUP" ]] && continue
+    claim "$LOCKS/job_$name" || continue
+    if "$PY" "$ROOT/scripts/is_complete.py" "$ROOT/logdir/$name"; then
+      date > "$ROOT/logdir/$name/DONE"; log "$name already complete -> DONE"
+      release "$LOCKS/job_$name"; continue
+    fi
+    echo "$line"; return 0
   done < "$QUEUE"
-  [[ -z "$job" ]] && { echo "[queue] $(date '+%F %T') no pending jobs, exiting"; break; }
+  return 1
+}
 
+has_pending() {
+  local line name
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+    name="${line%% *}"
+    [[ -f "$ROOT/logdir/$name/DONE" || -f "$ROOT/logdir/$name.GAVEUP" ]] && continue
+    return 0
+  done < "$QUEUE"
+  return 1
+}
+
+cuda_error() {
+  grep -qiE "CUDA_ERROR|cuda error|unknown error|XlaRuntimeError|INTERNAL: |RESOURCE_EXHAUSTED|out of memory|cudnn|cublas|NCCL|device-side|illegal memory"
+}
+
+log "started, gpu preference: ${PREF[*]}"
+while has_pending; do
+  # 1. GPU first, so a waiting worker never sits on a job another worker could run.
+  gpu=""
+  until gpu=$(pick_gpu); do
+    has_pending || break 2
+    if [[ $(sort -u "$BAD" | grep -c .) -ge 4 ]]; then log "all GPUs blacklisted, abort"; exit 2; fi
+    sleep 60
+  done
+  # 2. Job.
+  if ! job=$(pick_job); then
+    release "$LOCKS/gpu_$gpu"
+    sleep 60   # remaining jobs are running in the other worker
+    continue
+  fi
   name="${job%% *}"; args="${job#* }"
-  attempt=0; done_ok=0
-  while [[ $attempt -lt $MAX_RETRIES ]]; do
+  attempt=0; ok=0
+  while true; do
     attempt=$((attempt+1))
-    gpu=""
-    until gpu=$(pick_gpu); do
-      if [[ $(grep -c . "$BAD") -ge 4 ]]; then echo "[queue] all GPUs blacklisted, abort"; exit 2; fi
-      sleep 60
-    done
-    log="$ROOT/logdir/$name.log"
-    echo "[queue] $(date '+%F %T') start $name attempt=$attempt gpu=$gpu :: $args"
-    echo "=== attempt $attempt gpu=$gpu $(date) ===" >> "$log"
+    logf="$ROOT/logdir/$name.log"
+    log "start $name attempt=$attempt gpu=$gpu"
+    echo "=== worker $WORKER attempt $attempt gpu=$gpu $(date) ===" >> "$logf"
     # shellcheck disable=SC2086
-    "$ROOT/scripts/launch.sh" "$gpu" "$name" $args >> "$log" 2>&1
+    "$ROOT/scripts/launch.sh" "$gpu" "$name" $args >> "$logf" 2>&1
     code=$?
-    echo "[queue] $(date '+%F %T') end   $name exit=$code"
-    if [[ $code -eq 0 ]]; then date > "$ROOT/logdir/$name/DONE"; done_ok=1; break; fi
-    if tail -n 200 "$log" | cuda_error /dev/stdin; then
-      echo "[queue] GPU $gpu hit a CUDA/unknown error -> blacklisting it"
+    log "end   $name exit=$code"
+    if [[ $code -eq 0 ]]; then date > "$ROOT/logdir/$name/DONE"; ok=1; break; fi
+    if tail -n 200 "$logf" | cuda_error; then
+      log "GPU $gpu hit a CUDA/unknown error -> blacklisting it"
       echo "$gpu" >> "$BAD"
     fi
-    sleep 30   # resume from checkpoint on the next attempt
+    release "$LOCKS/gpu_$gpu"
+    [[ $attempt -ge $MAX_RETRIES ]] && break
+    sleep 30
+    gpu=""
+    until gpu=$(pick_gpu); do sleep 60; done
   done
-  [[ $done_ok -eq 0 ]] && { echo "$(date) gave up after $attempt attempts" > "$ROOT/logdir/$name.GAVEUP"; }
+  [[ $ok -eq 0 ]] && echo "$(date) gave up after $attempt attempts" > "$ROOT/logdir/$name.GAVEUP"
+  release "$LOCKS/gpu_$gpu"
+  release "$LOCKS/job_$name"
 done
+log "no pending jobs, exiting"

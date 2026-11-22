@@ -6,3 +6,5 @@ logdir/debug*/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+logdir/locks/
+logdir/bad_gpus

@@ -11,7 +11,8 @@ official implementation [danijar/dreamerv3](https://github.com/danijar/dreamerv3
 ├── env/              requirements-lock.txt (exact package versions that worked on RTX 5090)
 ├── scripts/
 │   ├── launch.sh     run one job on an idle GPU (refuses busy GPUs, no memory preallocation)
-│   ├── queue.sh      run scripts/queue.txt sequentially, with CUDA-crash fallback to another GPU
+│   ├── queue.sh      queue worker (run up to 2): idle-GPU only, lock files, CUDA-crash fallback
+│   ├── is_complete.py  has a run reached its step budget?
 │   ├── queue.txt     job list
 │   └── analyze.py    compare logdir/* with official scores -> docs/results.md, figures, index.md
 ├── logdir/           metrics.jsonl / scores.jsonl per run (checkpoints and replay are git-ignored)

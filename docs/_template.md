@@ -87,13 +87,14 @@ pip install crafter dm_control matplotlib pandas pyyaml
 scripts/launch.sh 2 atari100k_pong_s0 --configs atari100k --task atari100k_pong --seed 0
 
 # 3. (optional) run the whole job list in scripts/queue.txt sequentially
-scripts/queue.sh 2 0 1 3        # GPU preference order; waits for an idle GPU
+tmux new -d -s wA "scripts/queue.sh A 2 0 1 3"   # worker A, GPU preference order
+tmux new -d -s wB "scripts/queue.sh B 0 1 3 2"   # worker B (max 2 workers = max 2 GPUs)
 
 # 4. compare with the official scores and rebuild this page
 python scripts/analyze.py --logdir logdir --out docs
 ```
 
-`scripts/launch.sh` refuses to start if the chosen GPU is busy, and `scripts/queue.sh` blacklists a GPU that
+`scripts/launch.sh` refuses to start if the chosen GPU is busy. `scripts/queue.sh` workers only take a GPU that is completely idle, coordinate through lock files, blacklist a GPU that
 dies with a CUDA error and resumes the run from its checkpoint on another idle GPU.
 
 ## 6. Notes & limitations

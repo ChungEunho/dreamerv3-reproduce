@@ -70,6 +70,15 @@ def load_ours(logdir):
     df = pd.read_json(f, lines=True)
     if not len(df):
       continue
+    # A run resumed from a checkpoint re-logs the steps after that checkpoint.
+    # Drop the abandoned segment: whenever the step goes backwards, discard the
+    # earlier rows at or beyond the new step.
+    keep = []
+    for i, s in enumerate(df['step'].to_numpy()):
+      while keep and df['step'].iat[keep[-1]] >= s:
+        keep.pop()
+      keep.append(i)
+    df = df.iloc[keep]
     xs = df['step'].to_numpy(float) * SUITES[suite]['repeat']
     ys = df['episode/score'].to_numpy(float)
     yield dict(name=d.name, suite=suite, task=official_task, seed=config['seed'],
