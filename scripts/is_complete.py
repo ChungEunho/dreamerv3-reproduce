@@ -24,5 +24,8 @@ for line in met.read_text().splitlines():
     last = max(last, json.loads(line).get('step', 0))
   except json.JSONDecodeError:
     pass
-# The driver advances in chunks of 10 agent steps; allow one chunk of slack.
-sys.exit(0 if last >= target - 10 * repeat else 1)
+# Metrics are written every log_every seconds, so the last logged step can be a
+# few thousand frames short of the budget even for a finished run. 99% of the
+# budget is past the 400k-frame evaluation window (runs go to 440k), so this
+# never cuts data that the analysis uses.
+sys.exit(0 if last >= 0.99 * target else 1)
