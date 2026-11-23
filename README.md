@@ -25,6 +25,7 @@ Quick start:
 conda create -n dreamerv3 python=3.11 -y && conda activate dreamerv3
 pip install "jax[cuda12]==0.6.2" "chex<0.1.90"
 pip install -r env/requirements-lock.txt
-scripts/launch.sh 2 atari100k_pong_s0 --configs atari100k --task atari100k_pong --seed 0
+scripts/launch.sh 2 atari100k_pong_s0 --configs atari100k --task atari100k_pong --seed 0 \
+    --env.atari100k.actions all --env.atari100k.noops 0   # env protocol of the official scores
 python scripts/analyze.py
 ```
