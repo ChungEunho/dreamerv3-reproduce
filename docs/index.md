@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-24 00:34 KST · runs: 16 (finished 15, reproduced 2/6 games)_
+_Last updated: 2026-11-24 00:58 KST · runs: 17 (finished 16, reproduced 3/6 games)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -72,7 +72,7 @@ seed range `[min, max]` widened by one std.
 |---|---|---|---|---|---|---|---|
 | boxing | 3/3 | 79.5 ± 1.6 | 82 | 79.4 (70.2–85.0) | 662.7% / 683.3% | 90% | **reproduced** |
 | hero | 3/3 | 12251.5 ± 1651.4 | 13354 | 13344.3 (13190.7–13465.0) | 37.7% / 41.4% | 70% | **below official range** |
-| krull | 2/3 | 6934.2 ± 790.8 | 8171 | 7683.5 (7365.0–8154.3) | 499.6% / 615.4% | 78% | **below official range (partial 2/3)** |
+| krull | 3/3 | 7150.2 ± 714.3 | 8171 | 7683.5 (7365.0–8154.3) | 519.9% / 615.4% | 75% | **reproduced** |
 | kung_fu_master | 2/3 | 22221.0 ± 1271.0 | 25900 | 23301.7 (18766.7–29533.3) | 97.7% / 114.1% | 82% | **reproduced (partial 2/3)** |
 | ms_pacman | 2/3 | 1845.6 ± 548.7 | 1521 | 1525.8 (1206.7–1807.5) | 23.2% / 18.3% | 57% | **final ok, curve differs (partial 2/3)** |
 | pong | 3/3 | -7.5 ± 3.8 | -4 | -4.2 (-9.2–-1.3) | 37.5% / 47.2% | 85% | **reproduced** |
@@ -89,9 +89,10 @@ seed range `[min, max]` widened by one std.
 | hero | 2 | 100% | 13465.0 | 13344.3 ± 96.5 (13190.7–13465.0) | 61% | **reproduced** |
 | krull | 0 | 100% | 6143.3 | 7683.5 ± 356.4 (7365.0–8154.3) | 70% | **below official range** |
 | krull | 1 | 100% | 7725.0 | 7683.5 ± 356.4 (7365.0–8154.3) | 78% | **reproduced** |
-| krull | 2 | 90% | 7040.0 | 7683.5 ± 356.4 (7365.0–8154.3) | 68% | **reproduced** |
+| krull | 2 | 100% | 7582.2 | 7683.5 ± 356.4 (7365.0–8154.3) | 70% | **reproduced** |
 | kung_fu_master | 0 | 100% | 23492.0 | 23301.7 ± 4398.5 (18766.7–29533.3) | 88% | **reproduced** |
 | kung_fu_master | 1 | 100% | 20950.0 | 23301.7 ± 4398.5 (18766.7–29533.3) | 72% | **reproduced** |
+| kung_fu_master | 2 | 13% | – | 23301.7 ± 4398.5 (18766.7–29533.3) | 67% | **running** |
 | ms_pacman | 0 | 100% | 2394.3 | 1525.8 ± 240.7 (1206.7–1807.5) | 40% | **above official range** |
 | ms_pacman | 1 | 100% | 1296.9 | 1525.8 ± 240.7 (1206.7–1807.5) | 82% | **reproduced** |
 | pong | 0 | 100% | -12.0 | -4.2 ± 2.7 (-9.2–-1.3) | 74% | **below official range** |
