@@ -123,7 +123,7 @@ def load_ours(logdir):
 
 def final_score(xs, ys, budget, frac=0.1):
   lo = budget * (1 - frac)
-  m = (xs >= lo) & (xs <= budget * 1.02)
+  m = (xs >= lo) & (xs <= budget)   # same window as the official seeds (their data ends just below 400k)
   if m.sum() == 0:
     return np.nan
   return float(ys[m].mean())

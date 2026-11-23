@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-24 03:23 KST · runs: 18 (finished 18, reproduced 4/6 games)_
+_Last updated: 2026-11-24 04:25 KST · runs: 18 (finished 18, reproduced 4/6 games)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -101,54 +101,54 @@ land where the official 5 seeds land:
 - **14 of 18 individual seeds** have a final score inside the official range (± 1 std).
 - **Every game has at least 2 of 3 seeds inside the official range.** The 4 misses go in both directions
   (3 below, 1 above), so there is no systematic bias.
-- **6-game gamer-normalised score:** ours **230 %** mean / **71 %** median, official file 240 % / 75 %,
+- **6-game gamer-normalised score:** ours **227 %** mean / **72 %** median, official file 240 % / 75 %,
   paper Table 9 253 % / 81 % (same 6 games; not comparable to the 26-game numbers of Figure 1a).
 
 The two games that miss the per-game test miss because of one seed each:
 
 - **Hero** (final mean below range): seeds 0 and 2 reach the same ~13.4k plateau as all official seeds
-  (13373 and 13465). Seed 1 stays on a ~7.5k plateau and only reaches the 13k level at ~390k frames, so its
-  360k–400k average is 9917. The official range is very narrow (std 96) because all 5 official seeds hit the
+  (13349 and 13471). Seed 1 stays on a ~7.5k plateau and only reaches the 13k level at ~390k frames, so its
+  360k–400k average is 9541. The official range is very narrow (std 96) because all 5 official seeds hit the
   plateau before 360k frames, which makes this verdict sensitive to *when* a seed gets there.
 - **Ms. Pac-Man** (final mean in range, curve differs): seeds 1 and 2 follow the official curves closely
-  (1297 and 1356). Seed 0 learns much faster from ~180k frames and ends at 2394, above every official seed.
+  (1299 and 1327). Seed 0 learns much faster from ~180k frames and ends at 2336, above every official seed.
 
-The per-seed misses of Pong seed 0 (−12.0) and Krull seed 0 (6143) are within normal seed spread: the other two
+The per-seed misses of Pong seed 0 (−12.0) and Krull seed 0 (6078) are within normal seed spread: the other two
 seeds of each game are in range and the 3-seed means pass.
 
 #### Per game (verdict over our finished seeds)
 
 | task | seeds done | ours mean ± std | paper Table 9 | official file mean (min–max, 5 seeds) | gamer-norm ours / paper | curve in band | verdict |
 |---|---|---|---|---|---|---|---|
-| boxing | 3/3 | 79.5 ± 1.6 | 82 | 79.4 (70.2–85.0) | 662.7% / 683.3% | 90% | **reproduced** |
-| hero | 3/3 | 12251.5 ± 1651.4 | 13354 | 13344.3 (13190.7–13465.0) | 37.7% / 41.4% | 70% | **below official range** |
-| krull | 3/3 | 7150.2 ± 714.3 | 8171 | 7683.5 (7365.0–8154.3) | 519.9% / 615.4% | 75% | **reproduced** |
-| kung_fu_master | 3/3 | 23658.4 ± 2282.4 | 25900 | 23301.7 (18766.7–29533.3) | 104.1% / 114.1% | 82% | **reproduced** |
-| ms_pacman | 3/3 | 1682.4 ± 503.9 | 1521 | 1525.8 (1206.7–1807.5) | 20.7% / 18.3% | 70% | **final ok, curve differs** |
-| pong | 3/3 | -7.5 ± 3.8 | -4 | -4.2 (-9.2–-1.3) | 37.5% / 47.2% | 85% | **reproduced** |
+| boxing | 3/3 | 77.6 ± 1.7 | 82 | 79.4 (70.2–85.0) | 646.7% / 683.3% | 90% | **reproduced** |
+| hero | 3/3 | 12120.2 ± 1824.7 | 13354 | 13344.3 (13190.7–13465.0) | 37.2% / 41.4% | 70% | **below official range** |
+| krull | 3/3 | 7111.2 ± 735.3 | 8171 | 7683.5 (7365.0–8154.3) | 516.2% / 615.4% | 75% | **reproduced** |
+| kung_fu_master | 3/3 | 23921.1 ± 2293.5 | 25900 | 23301.7 (18766.7–29533.3) | 105.3% / 114.1% | 82% | **reproduced** |
+| ms_pacman | 3/3 | 1654.1 ± 482.6 | 1521 | 1525.8 (1206.7–1807.5) | 20.3% / 18.3% | 70% | **final ok, curve differs** |
+| pong | 3/3 | -7.4 ± 4.0 | -4 | -4.2 (-9.2–-1.3) | 37.7% / 47.2% | 85% | **reproduced** |
 
 #### Per seed
 
 | task | seed | progress | ours (last 10%) | official mean ± std (min–max) | curve in band | verdict |
 |---|---|---|---|---|---|---|
-| boxing | 0 | 100% | 78.8 | 79.4 ± 5.7 (70.2–85.0) | 88% | **reproduced** |
-| boxing | 1 | 100% | 78.0 | 79.4 ± 5.7 (70.2–85.0) | 95% | **reproduced** |
-| boxing | 2 | 100% | 81.8 | 79.4 ± 5.7 (70.2–85.0) | 82% | **reproduced** |
-| hero | 0 | 100% | 13372.8 | 13344.3 ± 96.5 (13190.7–13465.0) | 90% | **reproduced** |
-| hero | 1 | 100% | 9916.7 | 13344.3 ± 96.5 (13190.7–13465.0) | 70% | **below official range** |
-| hero | 2 | 100% | 13465.0 | 13344.3 ± 96.5 (13190.7–13465.0) | 61% | **reproduced** |
-| krull | 0 | 100% | 6143.3 | 7683.5 ± 356.4 (7365.0–8154.3) | 70% | **below official range** |
-| krull | 1 | 100% | 7725.0 | 7683.5 ± 356.4 (7365.0–8154.3) | 78% | **reproduced** |
-| krull | 2 | 100% | 7582.2 | 7683.5 ± 356.4 (7365.0–8154.3) | 70% | **reproduced** |
-| kung_fu_master | 0 | 100% | 23492.0 | 23301.7 ± 4398.5 (18766.7–29533.3) | 88% | **reproduced** |
+| boxing | 0 | 100% | 75.9 | 79.4 ± 5.7 (70.2–85.0) | 88% | **reproduced** |
+| boxing | 1 | 100% | 76.9 | 79.4 ± 5.7 (70.2–85.0) | 95% | **reproduced** |
+| boxing | 2 | 100% | 80.0 | 79.4 ± 5.7 (70.2–85.0) | 82% | **reproduced** |
+| hero | 0 | 100% | 13349.4 | 13344.3 ± 96.5 (13190.7–13465.0) | 90% | **reproduced** |
+| hero | 1 | 100% | 9540.6 | 13344.3 ± 96.5 (13190.7–13465.0) | 70% | **below official range** |
+| hero | 2 | 100% | 13470.7 | 13344.3 ± 96.5 (13190.7–13465.0) | 61% | **reproduced** |
+| krull | 0 | 100% | 6077.5 | 7683.5 ± 356.4 (7365.0–8154.3) | 70% | **below official range** |
+| krull | 1 | 100% | 7530.0 | 7683.5 ± 356.4 (7365.0–8154.3) | 78% | **reproduced** |
+| krull | 2 | 100% | 7726.2 | 7683.5 ± 356.4 (7365.0–8154.3) | 70% | **reproduced** |
+| kung_fu_master | 0 | 100% | 24280.0 | 23301.7 ± 4398.5 (18766.7–29533.3) | 88% | **reproduced** |
 | kung_fu_master | 1 | 100% | 20950.0 | 23301.7 ± 4398.5 (18766.7–29533.3) | 72% | **reproduced** |
 | kung_fu_master | 2 | 100% | 26533.3 | 23301.7 ± 4398.5 (18766.7–29533.3) | 81% | **reproduced** |
-| ms_pacman | 0 | 100% | 2394.3 | 1525.8 ± 240.7 (1206.7–1807.5) | 40% | **above official range** |
-| ms_pacman | 1 | 100% | 1296.9 | 1525.8 ± 240.7 (1206.7–1807.5) | 82% | **reproduced** |
-| ms_pacman | 2 | 100% | 1356.1 | 1525.8 ± 240.7 (1206.7–1807.5) | 85% | **reproduced** |
+| ms_pacman | 0 | 100% | 2336.4 | 1525.8 ± 240.7 (1206.7–1807.5) | 40% | **above official range** |
+| ms_pacman | 1 | 100% | 1299.2 | 1525.8 ± 240.7 (1206.7–1807.5) | 82% | **reproduced** |
+| ms_pacman | 2 | 100% | 1326.7 | 1525.8 ± 240.7 (1206.7–1807.5) | 85% | **reproduced** |
 | pong | 0 | 100% | -12.0 | -4.2 ± 2.7 (-9.2–-1.3) | 74% | **below official range** |
-| pong | 1 | 100% | -7.8 | -4.2 ± 2.7 (-9.2–-1.3) | 89% | **reproduced** |
-| pong | 2 | 100% | -2.8 | -4.2 ± 2.7 (-9.2–-1.3) | 81% | **reproduced** |
+| pong | 1 | 100% | -8.0 | -4.2 ± 2.7 (-9.2–-1.3) | 89% | **reproduced** |
+| pong | 2 | 100% | -2.3 | -4.2 ± 2.7 (-9.2–-1.3) | 81% | **reproduced** |
 
 
 ![atari100k](assets/atari100k_overview.png)
