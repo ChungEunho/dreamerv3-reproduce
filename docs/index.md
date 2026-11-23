@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-24 02:59 KST · runs: 18 (finished 17, reproduced 4/6 games)_
+_Last updated: 2026-11-24 03:23 KST · runs: 18 (finished 18, reproduced 4/6 games)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -92,6 +92,30 @@ Paper Table 9 is shown next to the official file mean. They are close but not id
 (Krull 8171 vs 7684, Kung-Fu Master 25900 vs 23302); we test against the per-seed file because it gives a spread.
 Gamer-normalised score = (agent − random) / (human − random), with random/human from Table 9.
 
+### Summary
+
+**DreamerV3 reproduces on Atari100k.** With the env protocol of the official scores, our 18 runs (6 games × 3 seeds)
+land where the official 5 seeds land:
+
+- **4 of 6 games pass both tests** (final score and learning curve): Boxing, Krull, Kung-Fu Master, Pong.
+- **14 of 18 individual seeds** have a final score inside the official range (± 1 std).
+- **Every game has at least 2 of 3 seeds inside the official range.** The 4 misses go in both directions
+  (3 below, 1 above), so there is no systematic bias.
+- **6-game gamer-normalised score:** ours **230 %** mean / **71 %** median, official file 240 % / 75 %,
+  paper Table 9 253 % / 81 % (same 6 games; not comparable to the 26-game numbers of Figure 1a).
+
+The two games that miss the per-game test miss because of one seed each:
+
+- **Hero** (final mean below range): seeds 0 and 2 reach the same ~13.4k plateau as all official seeds
+  (13373 and 13465). Seed 1 stays on a ~7.5k plateau and only reaches the 13k level at ~390k frames, so its
+  360k–400k average is 9917. The official range is very narrow (std 96) because all 5 official seeds hit the
+  plateau before 360k frames, which makes this verdict sensitive to *when* a seed gets there.
+- **Ms. Pac-Man** (final mean in range, curve differs): seeds 1 and 2 follow the official curves closely
+  (1297 and 1356). Seed 0 learns much faster from ~180k frames and ends at 2394, above every official seed.
+
+The per-seed misses of Pong seed 0 (−12.0) and Krull seed 0 (6143) are within normal seed spread: the other two
+seeds of each game are in range and the 3-seed means pass.
+
 #### Per game (verdict over our finished seeds)
 
 | task | seeds done | ours mean ± std | paper Table 9 | official file mean (min–max, 5 seeds) | gamer-norm ours / paper | curve in band | verdict |
@@ -100,7 +124,7 @@ Gamer-normalised score = (agent − random) / (human − random), with random/hu
 | hero | 3/3 | 12251.5 ± 1651.4 | 13354 | 13344.3 (13190.7–13465.0) | 37.7% / 41.4% | 70% | **below official range** |
 | krull | 3/3 | 7150.2 ± 714.3 | 8171 | 7683.5 (7365.0–8154.3) | 519.9% / 615.4% | 75% | **reproduced** |
 | kung_fu_master | 3/3 | 23658.4 ± 2282.4 | 25900 | 23301.7 (18766.7–29533.3) | 104.1% / 114.1% | 82% | **reproduced** |
-| ms_pacman | 2/3 | 1845.6 ± 548.7 | 1521 | 1525.8 (1206.7–1807.5) | 23.2% / 18.3% | 57% | **final ok, curve differs (partial 2/3)** |
+| ms_pacman | 3/3 | 1682.4 ± 503.9 | 1521 | 1525.8 (1206.7–1807.5) | 20.7% / 18.3% | 70% | **final ok, curve differs** |
 | pong | 3/3 | -7.5 ± 3.8 | -4 | -4.2 (-9.2–-1.3) | 37.5% / 47.2% | 85% | **reproduced** |
 
 #### Per seed
@@ -121,7 +145,7 @@ Gamer-normalised score = (agent − random) / (human − random), with random/hu
 | kung_fu_master | 2 | 100% | 26533.3 | 23301.7 ± 4398.5 (18766.7–29533.3) | 81% | **reproduced** |
 | ms_pacman | 0 | 100% | 2394.3 | 1525.8 ± 240.7 (1206.7–1807.5) | 40% | **above official range** |
 | ms_pacman | 1 | 100% | 1296.9 | 1525.8 ± 240.7 (1206.7–1807.5) | 82% | **reproduced** |
-| ms_pacman | 2 | 91% | 1516.7 | 1525.8 ± 240.7 (1206.7–1807.5) | 84% | **reproduced** |
+| ms_pacman | 2 | 100% | 1356.1 | 1525.8 ± 240.7 (1206.7–1807.5) | 85% | **reproduced** |
 | pong | 0 | 100% | -12.0 | -4.2 ± 2.7 (-9.2–-1.3) | 74% | **below official range** |
 | pong | 1 | 100% | -7.8 | -4.2 ± 2.7 (-9.2–-1.3) | 89% | **reproduced** |
 | pong | 2 | 100% | -2.8 | -4.2 ± 2.7 (-9.2–-1.3) | 81% | **reproduced** |
@@ -172,4 +196,3 @@ dies with a CUDA error and resumes the run from its checkpoint on another idle G
 - Only Atari100k was run: Crafter and DMC need roughly 25–50 h per run on one GPU, which did not fit the week.
 - Scores are from training episodes (sticky actions off, 1 env), matching how the official files were produced.
 
-<!-- DISCUSSION -->

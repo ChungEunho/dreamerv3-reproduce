@@ -18,6 +18,6 @@ done
 if git diff --cached --quiet; then echo "[publish] nothing to commit"; exit 0; fi
 git commit -q -m "${1:-results: update $(date '+%Y-%m-%d %H:%M')}
 
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 echo "[publish] committed $(git rev-parse --short HEAD)"
 if [[ $PUSH -eq 1 ]]; then git push -q origin main; echo "[publish] pushed"; fi

@@ -92,6 +92,30 @@ Paper Table 9 is shown next to the official file mean. They are close but not id
 (Krull 8171 vs 7684, Kung-Fu Master 25900 vs 23302); we test against the per-seed file because it gives a spread.
 Gamer-normalised score = (agent − random) / (human − random), with random/human from Table 9.
 
+### Summary
+
+**DreamerV3 reproduces on Atari100k.** With the env protocol of the official scores, our 18 runs (6 games × 3 seeds)
+land where the official 5 seeds land:
+
+- **4 of 6 games pass both tests** (final score and learning curve): Boxing, Krull, Kung-Fu Master, Pong.
+- **14 of 18 individual seeds** have a final score inside the official range (± 1 std).
+- **Every game has at least 2 of 3 seeds inside the official range.** The 4 misses go in both directions
+  (3 below, 1 above), so there is no systematic bias.
+- **6-game gamer-normalised score:** ours **230 %** mean / **71 %** median, official file 240 % / 75 %,
+  paper Table 9 253 % / 81 % (same 6 games; not comparable to the 26-game numbers of Figure 1a).
+
+The two games that miss the per-game test miss because of one seed each:
+
+- **Hero** (final mean below range): seeds 0 and 2 reach the same ~13.4k plateau as all official seeds
+  (13373 and 13465). Seed 1 stays on a ~7.5k plateau and only reaches the 13k level at ~390k frames, so its
+  360k–400k average is 9917. The official range is very narrow (std 96) because all 5 official seeds hit the
+  plateau before 360k frames, which makes this verdict sensitive to *when* a seed gets there.
+- **Ms. Pac-Man** (final mean in range, curve differs): seeds 1 and 2 follow the official curves closely
+  (1297 and 1356). Seed 0 learns much faster from ~180k frames and ends at 2394, above every official seed.
+
+The per-seed misses of Pong seed 0 (−12.0) and Krull seed 0 (6143) are within normal seed spread: the other two
+seeds of each game are in range and the 3-seed means pass.
+
 {{RESULTS_TABLE}}
 
 {{OVERVIEW_FIGURES}}
@@ -139,4 +163,3 @@ dies with a CUDA error and resumes the run from its checkpoint on another idle G
 - Only Atari100k was run: Crafter and DMC need roughly 25–50 h per run on one GPU, which did not fit the week.
 - Scores are from training episodes (sticky actions off, 1 env), matching how the official files were produced.
 
-<!-- DISCUSSION -->

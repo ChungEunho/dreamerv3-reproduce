@@ -2,41 +2,41 @@ agent:
   ac_grads: false
   advnorm: {impl: none, limit: 1e-08, rate: 0.01}
   conhead: {act: silu, layers: 1, norm: rms, output: binary, outscale: 1.0, 
-      units: 8, winit: trunc_normal_in}
+      units: 1024, winit: trunc_normal_in}
   contdisc: true
   dec:
     simple:
       act: silu
       bspace: 8
-      depth: 2
+      depth: 64
       kernel: 5
-      layers: 1
+      layers: 3
       mults: [2, 3, 4, 4]
       norm: rms
       outer: false
       outscale: 1.0
       strided: false
-      units: 8
+      units: 1024
       winit: trunc_normal_in
     typ: simple
   dyn:
-    rssm: {absolute: false, act: silu, blocks: 4, classes: 4, deter: 8, 
-        dynlayers: 1, free_nats: 1.0, hidden: 3, imglayers: 2, norm: rms, 
-        obslayers: 1, outscale: 1.0, stoch: 2, unimix: 0.01, winit: 
+    rssm: {absolute: false, act: silu, blocks: 8, classes: 64, deter: 8192, 
+        dynlayers: 1, free_nats: 1.0, hidden: 1024, imglayers: 2, norm: rms, 
+        obslayers: 1, outscale: 1.0, stoch: 32, unimix: 0.01, winit: 
         trunc_normal_in}
     typ: rssm
   enc:
     simple:
       act: silu
-      depth: 2
+      depth: 64
       kernel: 5
-      layers: 1
+      layers: 3
       mults: [2, 3, 4, 4]
       norm: rms
       outer: false
       strided: false
       symlog: true
-      units: 8
+      units: 1024
       winit: trunc_normal_in
     typ: simple
   horizon: 333
@@ -47,8 +47,8 @@ agent:
     rew: 1.0, value: 1.0}
   opt: {agc: 0.3, anneal: 0, beta1: 0.9, beta2: 0.999, eps: 1e-20, lr: 4e-05, 
       momentum: true, schedule: const, warmup: 1000, wd: 0.0}
-  policy: {act: silu, layers: 1, maxstd: 1.0, minstd: 0.1, norm: rms, outscale: 
-      0.01, unimix: 0.01, units: 8, winit: trunc_normal_in}
+  policy: {act: silu, layers: 3, maxstd: 1.0, minstd: 0.1, norm: rms, outscale: 
+      0.01, unimix: 0.01, units: 1024, winit: trunc_normal_in}
   policy_dist_cont: bounded_normal
   policy_dist_disc: categorical
   repl_loss: {lam: 0.95, slowreg: 1.0, slowtar: false}
@@ -59,14 +59,14 @@ agent:
   retnorm: {debias: false, impl: perc, limit: 1.0, perchi: 95.0, perclo: 5.0, 
       rate: 0.01}
   reward_grad: true
-  rewhead: {act: silu, bins: 5, layers: 1, norm: rms, output: symexp_twohot, 
-      outscale: 0.0, units: 8, winit: trunc_normal_in}
+  rewhead: {act: silu, bins: 255, layers: 1, norm: rms, output: symexp_twohot, 
+      outscale: 0.0, units: 1024, winit: trunc_normal_in}
   slowvalue: {every: 1, rate: 0.02}
   valnorm: {impl: none, limit: 1e-08, rate: 0.01}
-  value: {act: silu, bins: 5, layers: 1, norm: rms, output: symexp_twohot, 
-      outscale: 0.0, units: 8, winit: trunc_normal_in}
-batch_length: 10
-batch_size: 8
+  value: {act: silu, bins: 255, layers: 3, norm: rms, output: symexp_twohot, 
+      outscale: 0.0, units: 1024, winit: trunc_normal_in}
+batch_length: 64
+batch_size: 16
 clock_addr: ''
 clock_port: ''
 consec_report: 1
@@ -127,16 +127,16 @@ ipv6: false
 jax:
   compute_dtype: bfloat16
   coordinator_address: ''
-  debug: true
+  debug: false
   enable_policy: true
   expect_devices: 0
   jit: true
   mock_devices: 0
-  platform: cpu
+  platform: cuda
   policy_devices: [0]
   prealloc: false
   train_devices: [0]
-logdir: /mnt/data8tb/eunho/Dreamerv3/logdir/debug_atari100k
+logdir: /mnt/data8tb/eunho/Dreamerv3/logdir/atari100k_pong_s0
 logger:
   filter: score|length|fps|ratio|train/loss/|train/rand/
   fps: 15
@@ -152,11 +152,11 @@ replay:
   prio: {exponent: 0.8, initial: inf, maxfrac: 0.5, zero_on_sample: true}
   priosignal: model
   recexp: 1.0
-  size: 10000.0
+  size: 5000000.0
 replay_context: 1
 replica: 0
 replicas: 1
-report_length: 5
+report_length: 32
 run:
   actor_addr: localhost:{auto}
   actor_batch: -1
@@ -164,21 +164,21 @@ run:
   agent_process: false
   debug: true
   duration: 0
-  envs: 4
+  envs: 1
   episode_timeout: 180
   eval_envs: 4
   eval_eps: 1
   from_checkpoint: ''
-  log_every: 5
+  log_every: 120
   logger_addr: localhost:{auto}
   remote_envs: false
   remote_replay: false
   replay_addr: localhost:{auto}
   report_batches: 1
-  report_every: 10
-  save_every: 15
-  steps: 300.0
-  train_ratio: 8.0
+  report_every: 300
+  save_every: 900
+  steps: 110000.0
+  train_ratio: 256.0
   usage: {gc: false, gputil: false, malloc: false, nvsmi: true, psutil: true}
 script: train
 seed: 0
