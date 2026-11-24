@@ -3,11 +3,14 @@
 Reproduction of **DreamerV3** ([arXiv 2301.04104](https://arxiv.org/abs/2301.04104)) using the
 official implementation [danijar/dreamerv3](https://github.com/danijar/dreamerv3) on Atari100k.
 
-**Results page:** see `docs/` (published with GitHub Pages) — `docs/index.md`.
+**Results page:** https://chungeunho.github.io/dreamerv3-reproduce/ (built from `docs/` with GitHub Pages).
+
+The official code is included as a plain folder (not a submodule), so a normal `git clone` gets everything,
+and changes to `dreamerv3/` are tracked in this repository.
 
 ```
 .
-├── dreamerv3/        upstream code, commit e01491f, unmodified
+├── dreamerv3/        official code copied from danijar/dreamerv3 @ e01491f (MIT, see dreamerv3/LICENSE); unmodified so far
 ├── env/              requirements-lock.txt (exact package versions that worked on RTX 5090)
 ├── scripts/
 │   ├── launch.sh     run one job on an idle GPU (refuses busy GPUs, no memory preallocation)
@@ -22,6 +25,7 @@ official implementation [danijar/dreamerv3](https://github.com/danijar/dreamerv3
 Quick start:
 
 ```bash
+git clone https://github.com/ChungEunho/dreamerv3-reproduce.git && cd dreamerv3-reproduce
 conda create -n dreamerv3 python=3.11 -y && conda activate dreamerv3
 pip install "jax[cuda12]==0.6.2" "chex<0.1.90"
 pip install -r env/requirements-lock.txt
