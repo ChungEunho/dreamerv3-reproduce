@@ -13,23 +13,35 @@ and changes to `dreamerv3/` are tracked in this repository.
 ├── dreamerv3/        official code copied from danijar/dreamerv3 @ e01491f (MIT, see dreamerv3/LICENSE); unmodified so far
 ├── env/              requirements-lock.txt (exact package versions that worked on RTX 5090)
 ├── scripts/
-│   ├── launch.sh     run one job on an idle GPU (refuses busy GPUs, no memory preallocation)
-│   ├── queue.sh      queue worker (run up to 2): idle-GPU only, lock files, CUDA-crash fallback
 │   ├── is_complete.py  has a run reached its step budget?
-│   ├── queue.txt     job list
 │   └── analyze.py    compare logdir/* with official scores -> docs/results.md, figures, index.md
 ├── logdir/           metrics.jsonl / scores.jsonl per run (checkpoints and replay are git-ignored)
 └── docs/             GitHub Pages site
 ```
 
-Quick start:
+## Setup
 
 ```bash
 git clone https://github.com/ChungEunho/dreamerv3-reproduce.git && cd dreamerv3-reproduce
 conda create -n dreamerv3 python=3.11 -y && conda activate dreamerv3
 pip install "jax[cuda12]==0.6.2" "chex<0.1.90"
 pip install -r env/requirements-lock.txt
-scripts/launch.sh 2 atari100k_pong_s0 --configs atari100k --task atari100k_pong --seed 0 \
-    --env.atari100k.actions all --env.atari100k.noops 0   # env protocol of the official scores
-python scripts/analyze.py
 ```
+
+## Run one game
+
+The official scores were produced with all 18 Atari actions and no start no-ops, so pass both flags:
+
+```bash
+cd dreamerv3
+python dreamerv3/main.py --logdir ../logdir/atari100k_pong_s0 \
+    --configs atari100k --task atari100k_pong --seed 0 \
+    --env.atari100k.actions all --env.atari100k.noops 0
+cd ..
+python scripts/is_complete.py logdir/atari100k_pong_s0 && date > logdir/atari100k_pong_s0/DONE
+python scripts/analyze.py    # compare logdir/* with the official scores -> docs/
+```
+
+`analyze.py` reads the game and seed from each run's `config.yaml`, and only counts a run as finished
+once it has a `DONE` file. One run takes about 2h20m and
+~17 GB of GPU memory on an RTX 5090.

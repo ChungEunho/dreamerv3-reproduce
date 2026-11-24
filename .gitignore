@@ -15,3 +15,9 @@ logdir_ablation/*/scope/
 
 # local write-ups (proposal, report PDFs) - never pushed
 report/
+# lab-server-only helpers (shared-GPU rules, job queue, publish) - kept local
+scripts/launch.sh
+scripts/queue.sh
+scripts/queue.txt
+scripts/gpu_free.sh
+scripts/publish.sh

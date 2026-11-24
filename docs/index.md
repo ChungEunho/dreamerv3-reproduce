@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-24 17:00 KST · runs: 18 (finished 18, reproduced 4/6 games)_
+_Last updated: 2026-11-24 17:16 KST · runs: 18 (finished 18, reproduced 4/6 games)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -166,20 +166,17 @@ pip install "jax[cuda12]==0.6.2" "chex<0.1.90"
 pip install -r dreamerv3/requirements.txt --no-deps   # or env/requirements-lock.txt for exact versions
 pip install crafter dm_control matplotlib pandas pyyaml
 
-# 2. one run (paper defaults + the env protocol of the official scores), on GPU 2
-scripts/launch.sh 2 atari100k_pong_s0 --configs atari100k --task atari100k_pong --seed 0 \
+# 2. one run (paper defaults + the env protocol of the official scores)
+cd dreamerv3
+python dreamerv3/main.py --logdir ../logdir/atari100k_pong_s0 \
+    --configs atari100k --task atari100k_pong --seed 0 \
     --env.atari100k.actions all --env.atari100k.noops 0
+cd ..
 
-# 3. (optional) run the whole job list in scripts/queue.txt sequentially
-tmux new -d -s wA "scripts/queue.sh A 2 0 1 3"   # worker A, GPU preference order
-tmux new -d -s wB "scripts/queue.sh B 0 1 3 2"   # worker B (max 2 workers = max 2 GPUs)
-
-# 4. compare with the official scores and rebuild this page
+# 3. mark the run as finished, compare with the official scores and rebuild this page
+python scripts/is_complete.py logdir/atari100k_pong_s0 && date > logdir/atari100k_pong_s0/DONE
 python scripts/analyze.py --logdir logdir --out docs
 ```
-
-`scripts/launch.sh` refuses to start if the chosen GPU is busy. `scripts/queue.sh` workers only take a GPU that is completely idle, coordinate through lock files, blacklist a GPU that
-dies with a CUDA error and resumes the run from its checkpoint on another idle GPU.
 
 ## 6. Notes & limitations
 
