@@ -5,7 +5,7 @@ title: DreamerV3 Reproduction (Week 1)
 
 # DreamerV3 Reproduction — Week 1 (Reproduce)
 
-_Last updated: 2026-11-24 04:25 KST · runs: 18 (finished 18, reproduced 4/6 games)_
+_Last updated: 2026-11-24 17:00 KST · runs: 18 (finished 18, reproduced 4/6 games)_
 
 **Paper:** Hafner et al., *Mastering Diverse Domains through World Models* (DreamerV3), [arXiv 2301.04104](https://arxiv.org/abs/2301.04104), Nature 2025.
 **Code:** [danijar/dreamerv3](https://github.com/danijar/dreamerv3) at commit `e01491f` (Oct 2026), unmodified.
@@ -107,9 +107,9 @@ land where the official 5 seeds land:
 The two games that miss the per-game test miss because of one seed each:
 
 - **Hero** (final mean below range): seeds 0 and 2 reach the same ~13.4k plateau as all official seeds
-  (13349 and 13471). Seed 1 stays on a ~7.5k plateau and only reaches the 13k level at ~390k frames, so its
-  360k–400k average is 9541. The official range is very narrow (std 96) because all 5 official seeds hit the
-  plateau before 360k frames, which makes this verdict sensitive to *when* a seed gets there.
+  (13349 and 13471). Seed 1 stays on a ~7.5k plateau until ~370k frames and only then climbs to 12k–13k, so its
+  360k–400k average is 9541. The official range is very narrow (std 96) because all 5 official seeds passed 13k
+  between 220k and 345k frames, which makes this verdict sensitive to *when* a seed gets there.
 - **Ms. Pac-Man** (final mean in range, curve differs): seeds 1 and 2 follow the official curves closely
   (1299 and 1327). Seed 0 learns much faster from ~180k frames and ends at 2336, above every official seed.
 

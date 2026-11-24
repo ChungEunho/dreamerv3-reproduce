@@ -12,3 +12,6 @@ logdir_aborted/
 logdir_ablation/*/replay/
 logdir_ablation/*/ckpt/
 logdir_ablation/*/scope/
+
+# local write-ups (proposal, report PDFs) - never pushed
+report/
